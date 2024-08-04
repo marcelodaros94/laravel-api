@@ -20,7 +20,7 @@ Route::middleware('auth:sanctum')->get('user', [AuthController::class, 'user']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('user', [AuthController::class, 'user']);
-    Route::post('/orders', [OrderController::class, 'store']);
-    
+    Route::post('orders', [OrderController::class, 'store']);
+    Route::put('order/{order}/status', [OrderController::class, 'updateStatus']);
 });
 

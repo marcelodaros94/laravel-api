@@ -9,10 +9,26 @@ use App\Models\Order;
 use App\Models\OrderStatus;
 use Mockery;
 
-class OrderControllerTest extends TestCase
+class OrderAndStatusTest extends TestCase
 {
-    // Use DatabaseTransactions to handle database changes
     use DatabaseTransactions;
+
+    protected $orderMock;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        // Mock the Order model once
+        $this->orderMock = Mockery::mock('overload:' . Order::class);
+    }
+
+    protected function tearDown(): void
+    {
+        // Close Mockery to avoid issues with overlapping mocks
+        Mockery::close();
+        parent::tearDown();
+    }
 
     /** @test */
     public function it_can_create_an_order()
@@ -22,15 +38,13 @@ class OrderControllerTest extends TestCase
         $deliveryPerson = User::factory()->create();
         $orderStatus = OrderStatus::factory()->create();
 
-        // Mock the Order model
-        $orderMock = Mockery::mock('overload:' . Order::class);
-        $orderMock->shouldReceive('create')
+        $this->orderMock->shouldReceive('create')
             ->once()
             ->with(Mockery::subset([
                 'order_number' => 'ORD001',
                 'products' => json_encode(
                     ['sku' => 'P001', 'name' => 'Product A', 'type' => 1, 'tags' => 'tag1,tag2', 'price' => 100.00, 'unit_of_measure' => 1]
-                ),  // Ensure products is a JSON string
+                ),
                 'order_date' => now()->toDateTimeString(),
                 'receipt_date' => now()->toDateTimeString(),
                 'dispatch_date' => now()->toDateTimeString(),
@@ -39,17 +53,17 @@ class OrderControllerTest extends TestCase
                 'delivery_person_id' => $deliveryPerson->id,
                 'order_status_id' => $orderStatus->id,
             ]))
-            ->andReturn($orderMock);
+            ->andReturn($this->orderMock);
 
-        $orderMock->shouldReceive('toArray')->andReturn([
+        $this->orderMock->shouldReceive('toArray')->andReturn([
             'order_number' => 'ORD001',
             'salesperson_id' => $salesperson->id,
             'delivery_person_id' => $deliveryPerson->id,
             'order_status_id' => $orderStatus->id,
         ]);
 
-        $orderMock->shouldReceive('getAttribute')->andReturnUsing(function ($key) use ($orderMock) {
-            return $orderMock->$key;
+        $this->orderMock->shouldReceive('getAttribute')->andReturnUsing(function ($key) {
+            return $this->orderMock->$key;
         });
 
         // Authenticate a user
@@ -61,7 +75,7 @@ class OrderControllerTest extends TestCase
             'order_number' => 'ORD001',
             'products' => json_encode(
                 ['sku' => 'P001', 'name' => 'Product A', 'type' => 1, 'tags' => 'tag1,tag2', 'price' => 100.00, 'unit_of_measure' => 1]
-            ),  // Ensure products is a JSON string
+            ),
             'order_date' => now()->toDateTimeString(),
             'receipt_date' => now()->toDateTimeString(),
             'dispatch_date' => now()->toDateTimeString(),
@@ -76,8 +90,6 @@ class OrderControllerTest extends TestCase
 
         // Assert the response
         $response->assertStatus(201);
-
-        // Verify that the mock was called
-        Mockery::close();
     }
+    
 }
