@@ -15,10 +15,10 @@ class OrderStatusTableSeeder extends Seeder
     public function run()
     {
         DB::table('order_statuses')->insert([
-            ['name' => 'Por atender'],
-            ['name' => 'En proceso'],
-            ['name' => 'En delivery'],
-            ['name' => 'Recibido']
+            ['name' => 'Por atender', 'order' => 1],
+            ['name' => 'En proceso', 'order' => 2],
+            ['name' => 'En delivery', 'order' => 3],
+            ['name' => 'Recibido', 'order' => 4],
         ]);
     }
 }
