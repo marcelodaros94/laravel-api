@@ -14,23 +14,32 @@ class OrderController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
-        // Validate the request
-        $validatedData = $request->validate([
-            'order_number' => 'required|string|max:255|unique:orders',
-            'products' => 'required|array',
-            'order_date' => 'required|date',
-            'receipt_date' => 'nullable|date',
-            'dispatch_date' => 'nullable|date',
-            'delivery_date' => 'nullable|date',
-            'salesperson_id' => 'required|exists:users,id',
-            'delivery_person_id' => 'nullable|exists:users,id',
-            'order_status_id' => 'required|exists:order_statuses,id',
-        ]);
+{
+    // Log request data
+    \Log::info('Request Data:', $request->all());
 
-        // Create the order
-        $order = Order::create($validatedData);
+    // Validate request data
+    $validated = $request->validate([
+        'order_number' => 'required|string',
+        'products' => 'required',
+        'order_date' => 'required|date',
+        'receipt_date' => 'required|date',
+        'dispatch_date' => 'required|date',
+        'delivery_date' => 'required|date',
+        'salesperson_id' => 'required|exists:users,id',
+        'delivery_person_id' => 'required|exists:users,id',
+        'order_status_id' => 'required|exists:order_statuses,id',
+    ]);
 
-        return response()->json($order, 201);
-    }
+    // Log validated data
+    \Log::info('Validated Data:', $validated);
+
+    // Create the order
+    $order = Order::create($validated);
+
+    // Log created order
+    \Log::info('Created Order:', $order->toArray());
+
+    return response()->json($order, 201);
+}
 }

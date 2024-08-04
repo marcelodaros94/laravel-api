@@ -24,7 +24,7 @@ class UserFactory extends Factory
             'password' => Hash::make('password123'),
             'role_id' => $this->faker->numberBetween(1, 4), 
             'position_id' => $this->faker->numberBetween(1, 3),
-            'phone' => $this->faker->phoneNumber, 
+            'phone' => $this->faker->regexify('[0-9]{3}-[0-9]{3}-[0-9]{4}'),
             'code' => $this->faker->unique()->bothify('EMP###'), 
         ];
     }
